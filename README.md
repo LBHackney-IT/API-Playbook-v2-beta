@@ -39,7 +39,7 @@ Contents
     - [End-to-end Testing (Post-deployment)](#end-to-end-testing)
        - [Pre-requirements](#pre-requirements)
 - [CheckList](#checklist)
-- [Making decisions about APIs)](#making-decisions-about-apis)
+- [Making decisions about APIs](#making-decisions)
 
 
 ## Introduction
@@ -181,7 +181,7 @@ Based on this Clean Architecture methodology, our project folders are structured
 
 * **Controllers** 
      * Holds the controller classes
-          * By default, BaseController.cs and HealthCheckController.cs should be included in your project
+        * By default, BaseController.cs and HealthCheckController.cs should be included in your project
 * **Domain**
      * Holds the model class defining the domain object returned to the consumer of the API 
 
@@ -223,16 +223,16 @@ _Principle: The API is hosted by Hackney’s AWS account unless there is a good 
 Current infrastructure [Architecture](https://docs.google.com/document/d/1xmn82dGiubC9oX7AqSO6Ieo6OWJVphT_Qp55kdQBkuc/edit)
 
 
-1. Infrastructure as code
+**1. Infrastructure as code**
 
 Our API infrastructure is deployed in AWS and we manage it using the Infrastructure as a code tool Terraform. We have a private Github repository with our Terraform project so new additions or modifications to our infrastructure should be worked out using it. More information on the Terraform project [Terraform](https://docs.google.com/document/d/1aUE7VnMvfvbDYVp5Kb8f6D0ALvXidkU4Gbbx4FEY2Cw/edit)
 
-2. ECS 
+**2. ECS**
 
 We use ECS on AWS to run Docker containers in the cloud. This allows us to use the same Docker containers we use in development, for actually serving in production. ECS orchestrates deployments of new images, running them on our own EC2 machines. ECS is a fairly simple and cost effective approach to running Docker in production, and allows us to run containers within our AWS VPC, which has a VPN connection to the Hackney network. It can also be securely connected to our AWS API Gateway without making the EC2 instances public, meaning they are more secure.
 Currently we are using terraform to setup the new applications on ECS. For more details please read ‘Infrastructure as code’.
  
-3. API Gateway
+**3. API Gateway**
 
 We use AWS API Gateway to handle requests coming into our platform, validate them, and direct them to the correct application. For example, a request to /income/api/v1/my-cases will be directed to the /api/v1/my-cases route of the Income API.
 Authentication occurs inside the API Gateway too, validating that inbound requests have a valid API Token header, and forbidding them if not. Authenticated requests will be passed onto a load balancer via a VPC Link, which will then pass it onto the most appropriate application server.
@@ -241,15 +241,15 @@ Authentication occurs inside the API Gateway too, validating that inbound reques
 
 _Principle: If Hackney IT is responsible for the delivery or support of the application, Hackney’s monitoring tools need to be used._
 
-1. Centralised logging
+**1. Centralised logging**
 
 We use [Papertrial](https://papertrailapp.com/) as a centralised log platform, as it has a good interface, is easy to use, and is well priced. It allows us to see a stream of logs from a single application, a group of applications, or all applications at once. We can easily search by common references to trace requests across microservices. If you are deployed to the Hackney ECS environment, your service will log to Papertrail automatically. You need to set the Hostname of your container to the name of your service in your task definition.
  
-2. Centralised application performance monitoring
+**2. Centralised application performance monitoring**
 
 We use [New Relic](https://newrelic.com/) as a centralised application performance monitoring tool, as it is capable of instrumenting applications in many languages, including C# and Ruby. It allows us to see requests going through an application and where time is spent during those requests. For example, if a large SQL call is what is hurting performance. In a .NET application, you install a New Relic Agent on the machine, which will automatically instrument any .NET apps running.  [New Relic Setup Guide](https://docs.google.com/document/d/1Mew6ZDm-3PbbejiqV8E1qgEIrQmods3AT6-NQqX6yXo/edit).
  
-3. Centralised uptime monitoring
+**3. Centralised uptime monitoring**
 
 We use [StatusCake](https://www.statuscake.com/) as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services. If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues. [StatusCake Setup Guide]https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
 This is directly integrated with Slack channel named as api-healthchecks.
@@ -275,6 +275,8 @@ Ensure you have added all required CircleCI environment variables. The guide pro
 [Deployment Pipeline](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
 
 ### Branching
+
+**Principle : We use Gitflow branching strategy unless there is good reason not to do.**
 
 **We use GitFlow branching strategy.**
 
