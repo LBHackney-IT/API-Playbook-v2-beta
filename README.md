@@ -28,7 +28,7 @@ Contents
    - [API Gateway](#api-gateway)
    - [Monitoring tools](#monitoring-tools)
       * [Centralised logging](#centralised-logging)
-      * [Centralised application performance monitoring] (#centralised-application-logging)
+      * [Centralised application performance monitoring](#centralised-application-logging)
       * [Centralised uptime monitoring](#centralised-uptime-monitoring)
 - [Deploying your API](#deploying-your-api)
     - [CI/CD Pipeline](#ci-cd-pipeline)
