@@ -131,6 +131,13 @@ Currently the above boilerplate is created .net core however going forward we wi
 
 All APIs are run in a containerised environment, each solution (main and tests) do contain a The docker entry point is the docker-compose file and with its current setup it allows to build the project alongside an instance of the UH simulator. The Docker file contained in the base API should be updated to reflect the details of the project it is being used for. More information on how we use [Docker](https://docs.google.com/document/d/16HyKtQtUBjz-W9HwIPF4T-CnSe1m8poqCilRtRohZmQ/edit#heading=h.6jjvle8n1rck)
 
+For an example of using Docker with .NET Core, see the [Tenancy API][tenancy-api].
+
+For an example of using Docker with Ruby, see the [Income API][income-api].
+
+For an example of using Docker with other tools, see the [Universal Housing Simulator][universal-housing-simulator] which creates and starts a SQL Server instance.
+
+
 ### TDD - Test Driven Development
 
 **Principle: use automated testing to ensure your features are fully tested and dependencies are identified.**
@@ -366,7 +373,8 @@ Technical Team:
 * Test for a main endpoint (one that retrieves data) and the health check endpoint - both of them should be successfully invoked for testing to pass.
 
 * Other complaince checklists are
-![hackneystandardscompliance](images/hackneystandardscompliance.png.png))
+
+![hackneystandardscompliance](images/hackneystandardscompliance.png))
 
 ## Making decisions about APIs
 
@@ -374,9 +382,9 @@ ICT DMT agreed the API standards in autumn 2019 in line with commonly used appro
   * 12 factor development principles
   * GDS API standards
 
-Any revisions to the API standard or the principles within the Playbook only take effect when they are agreed by ICT DMT. 
+Any revisions to the API standard or the principles within the Playbook only take effect when they are agreed by **ICT DMT**. 
 
-The design of a Platform API needs to be agreed with:
+The design of a **Platform AP**I needs to be agreed with:
   * API Platform Product Owner.
   * The Data and Insight team manager
   * The Product Owner for the service
@@ -385,14 +393,14 @@ The design of a Platform API needs to be agreed with:
   * Information governance
 
 
-The design of a Service API needs to be agreed with:
+The design of a **Service API** needs to be agreed with:
   * API Platform Product Owner
   * The Product Owner for the service
   * Applications Management (where it connects to a live business system)
   * ICT technical architecture and security
   * Information governance (where it deals with personally-identifiable information)
 
-Before the first deployment, you need a change management request (CMR) agreed by the relevant teams. This is likely to require a conversation, including:
+Before the first deployment, you need a **Change Management Request (CMR)** agreed by the relevant teams. This is likely to require a conversation, including:
  * API Platform Product Owner
  * The Product Owner for the service
  * Applications Management
