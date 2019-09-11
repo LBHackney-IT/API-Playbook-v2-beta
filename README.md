@@ -114,11 +114,14 @@ Your API will need to meet the following standards for it to be accepted into se
 
 A template is provided on Github that forms the basis for all APIs. This base API contains all the tools to get you up and running quickly, so the first task in the development of any API is to fork the Base API Repo (https://github.com/LBHackney-IT/lbh-base-api) and update to your project name:
 
-* Main project and test project folders
+* Main project and test project folders.
 * Namespaces in the .cs files (The Namespaces shouldn’t contain dash symbols as it prevents the project from compiling - replace them with underscores. Ex.: “property_api” rather than “property-api”.)
-* Project mentions in the dotnet csproj files for project and test solution
-* Project mentions in the docker-related files and CircleCI configuration
-* Create a public GitHub repo (ensure no secrets are submitted)
+* Project mentions in the dotnet csproj files for project and test solution.
+* Project mentions in the docker-related files and CircleCI configuration.
+* Create a public GitHub repo. (ensure no secrets are submitted)
+
+Currently the above boilerplate is created .net core however going forward we will be creating other boilerplates in different languages.
+
 
 ###  Containerisation
 
