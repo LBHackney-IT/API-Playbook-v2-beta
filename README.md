@@ -17,7 +17,7 @@ Contents
    - [Boilerplate Code](#boilerplate-code)
    - [Containerisation](#containersation)
    - [TDD - Test Driven Development](#test-driven-development)
-        - [How to write good TDDs](#how-to-write-good-TDDs)
+     - [How to write good TDDs](#how-to-write-good-TDDs)
    - [Working with housing data - Universal housing simulator](#universal-housing-simulator)
    - [Folder Structure](#folder-structure)
    - [End-to-end testing](#end-to-end-testing)
@@ -27,8 +27,9 @@ Contents
    - [ECS](#ecs)
    - [API Gateway](#api-gateway)
    - [Monitoring tools](#monitoring-tools)
-       - [Centralised logging](#centralised-logging)
-       - [Centralised uptime monitoring](#centralised-uptime-monitoring)
+      * [Centralised logging](#centralised-logging)
+      * [Centralised application performance monitoring] (#centralised-application-logging)
+      * [Centralised uptime monitoring](#centralised-uptime-monitoring)
 - [Deploying your API](#deploying-your-api)
     - [CI/CD Pipeline](#ci-cd-pipeline)
     - [Pre-deployment](#pre-deployment)
@@ -112,7 +113,7 @@ Your API will need to meet the following standards for it to be accepted into se
 
 ###  Boilerplate Code
 
-**The principle: re-use our boilerplate code unless you can provide clear reasons it doesn’t meet your needs.**
+**Principle: Re-use our boilerplate code unless you can provide clear reasons it doesn’t meet your needs.**
 
 A template is provided on Github that forms the basis for all APIs. This base API contains all the tools to get you up and running quickly, so the first task in the development of any API is to fork the Base API Repo (https://github.com/LBHackney-IT/lbh-base-api) and update to your project name:
 
@@ -131,12 +132,9 @@ Currently the above boilerplate is created .net core however going forward we wi
 
 All APIs are run in a containerised environment, each solution (main and tests) do contain a The docker entry point is the docker-compose file and with its current setup it allows to build the project alongside an instance of the UH simulator. The Docker file contained in the base API should be updated to reflect the details of the project it is being used for. More information on how we use [Docker](https://docs.google.com/document/d/16HyKtQtUBjz-W9HwIPF4T-CnSe1m8poqCilRtRohZmQ/edit#heading=h.6jjvle8n1rck)
 
-For an example of using Docker with .NET Core, see the [Tenancy API][tenancy-api].
+For an example of using Docker with .NET Core, see the [Tenancy API] https://github.com/LBHackney-IT/LBHTenancyAPI.
 
-For an example of using Docker with Ruby, see the [Income API][income-api].
-
-For an example of using Docker with other tools, see the [Universal Housing Simulator][universal-housing-simulator] which creates and starts a SQL Server instance.
-
+For an example of using Docker with Ruby, see the [Income API] https://github.com/LBHackney-IT/lbh-income-api.
 
 ### TDD - Test Driven Development
 
@@ -178,8 +176,9 @@ Those versions are saved in images in an ECR repository.  The docker-compose.yml
 When you run docker-compose up command locally, docker spins up both the API and the UH simulator database that is used throughout testing
 
 Once APIs are deployed to our development environment, we use an AWS RDS version of the UH simulator. 
-    * It's populated UH simulator with real anonymised data
-    * To use that version, the correct connection string needs to be provided in the ‘Parameter Store’.
+
+* It's populated UH simulator with real anonymised data
+* To use that version, the correct connection string needs to be provided in the ‘Parameter Store’.
 
 The UH simulator DB was produced and maintained via a Ruby project. More on how it works can be found here.  
 
@@ -211,7 +210,7 @@ All of the above classes are grouped per version. (e.g. all of the above folders
 
 ![folderstructure](images/folderstructure.png))
 
-* * Tests
+* **Tests**
    The folder hierarchy of the test project should closely match that of the main project folder.  For each of the classes created for the project there should be a corresponding suite of tests.
 
 ![folderstructure](images/folderstructure.png))
