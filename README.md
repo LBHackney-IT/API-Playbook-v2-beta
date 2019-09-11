@@ -329,11 +329,11 @@ Production DB credentials need to be requested for the API you are working on
    4. Matthew Keyworth (matthew.keyworth@hackney.gov.uk) 
 
 Ensure that your API has the correct DB connection string in AWS parameter store
-     * Open AWS management console and click on ‘Services’
-     * Go to ‘Systems Manager’
-     * Click on ‘Parameter store’ (bottom left corner) 
-     * Locate the production DB connection string for the API you are working on
-     * Update the connection string to be pointing to a production DB and to include the correct credentials. If unsure of DB server, please consult the production connection strings of any of the other APIs using the same DB as data source
+  * Open AWS management console and click on ‘Services’
+  * Go to ‘Systems Manager’
+  * Click on ‘Parameter store’ (bottom left corner) 
+  * Locate the production DB connection string for the API you are working on
+  * Update the connection string to be pointing to a production DB and to include the correct credentials. If unsure of DB server, please consult the production connection strings of any of the other APIs using the same DB as data source
 
 **Ensure that the CircleCI deployment workflow authorization step has been completed**. Deployment to production will NOT occur until a manual authorization has been provided in the CircleCI console. Please see below:
 
@@ -373,7 +373,7 @@ Technical Team:
 
 * Other complaince checklists are
 
-![hackneystandardscompliance](images/hackneystandardscompliance.png))
+![hackneystandardscompliance](images/hackneystandardscompliance.png)
 
 ## Making decisions about APIs
 
