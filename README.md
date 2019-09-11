@@ -275,7 +275,7 @@ Ensure you have added all required CircleCI environment variables. The guide pro
 
 ### Our deployment pipeline
 
-[Deployment Pipeline](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
+![deploymentpipeline](images/DeploymentPipeline.png)
 
 ### Branching
 
