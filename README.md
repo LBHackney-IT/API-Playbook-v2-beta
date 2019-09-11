@@ -38,7 +38,7 @@ Contents
     - [Our deployment pipeline](#our-deployment-pipeline)
     - [End-to-end Testing (Post-deployment)](#end-to-end-testing)
        - [Pre-requirements](#pre-requirements)
-- [CheckList)](#checklist)
+- [CheckList](#checklist)
 - [Making decisions about APIs)](#making-decisions-about-apis)
 
 
@@ -70,8 +70,6 @@ We want our data to be available via REST API wherever there is a user need. We 
 
 ### Establishing the user need
 
-Establishing the user need
-
 Before we write an API we need to establish the user need. Typically, we do this in a Discovery phase when we’re exploring the opportunity to use technology and data to better meet the needs of our residents. Our discovery phase should identify:
 
 * What data we currently hold, where, who needs it and how it’s used
@@ -82,7 +80,8 @@ Before we write an API we need to establish the user need. Typically, we do this
 We typically record the user need through user stories, but this can be decided by individual teams. A prototyping phase might experiment with a stub API so that we can validate the user need. 
 
 **_Example user story_**
-**_As an application developer, I need to be able to retrieve addresses added, deleted or modified in the property gazetteer between 2 dates so that I am assured the data we have is current_**
+
+**_"As an application developer, I need to be able to retrieve addresses added, deleted or modified in the property gazetteer between 2 dates so that I am assured the data we have is current"._**
 
 On occasion, we will identify a user need for a platform API that hasn’t yet been fulfilled. This may mean we need to develop an API without a full understanding of the user need, meaning this will need to be iterated subsequently. The API Platform Product Owner makes these decisions on a case-by-case basis, in collaboration with the delivery managers and Data and Insight Manager. 
 
@@ -123,9 +122,14 @@ A template is provided on Github that forms the basis for all APIs. This base AP
 
 ###  Containerisation
 
+**Principle: use containerisation unless there’s clear evidence it’s not right for your service.**
+
 All APIs are run in a containerised environment, each solution (main and tests) do contain a The docker entry point is the docker-compose file and with its current setup it allows to build the project alongside an instance of the UH simulator. The Docker file contained in the base API should be updated to reflect the details of the project it is being used for. More information on how we use [Docker](https://docs.google.com/document/d/16HyKtQtUBjz-W9HwIPF4T-CnSe1m8poqCilRtRohZmQ/edit#heading=h.6jjvle8n1rck)
 
 ### TDD - Test Driven Development
+
+**Principle: use automated testing to ensure your features are fully tested and dependencies are identified.**
+
 We use the Test Driven Development methodology when writing new code, as it makes it easier to build functionality progressively, helps reduce error rate in production, and helps prevent against feature regressions after changes. We use Clean Architecture principles which allows us to easily test each unit of our applications.
  
 * How to write good TDDs
@@ -168,7 +172,8 @@ The UH simulator DB was produced and maintained via a Ruby project. More on how 
 
 ### Folder structure
 
-Principle: Structure your APIs in this way so that Hackney can support them, unless there is good reason not to
+_Principle: Structure your APIs in this way so that Hackney can support them, unless there is good reason not to._
+
 Based on this Clean Architecture methodology, our project folders are structured in the following way: 
 
 * **Boundary**
@@ -213,7 +218,7 @@ By default, building the project via docker-compose will create images of the pr
 
 ## Hosting
 
-_Principle: The API is hosted by Hackney’s AWS account unless there is a good reason not to. _
+_Principle: The API is hosted by Hackney’s AWS account unless there is a good reason not to._
 
 Current infrastructure [Architecture](https://docs.google.com/document/d/1xmn82dGiubC9oX7AqSO6Ieo6OWJVphT_Qp55kdQBkuc/edit)
 
@@ -296,15 +301,16 @@ Ensure you have added all required CircleCI environment variables. The guide pro
 
 ### End-to-end Testing (Post-deployment)
 
-Pre-requirements
+**Pre-requirements**
 
 Production DB credentials need to be requested for the API you are working on
-     * This is done via Landesk (for UH)
-     * For CRM 365 credentials, please speak to:
-            1. Rashmi Shetty (rashmi.shetty@hackney.gov.uk)
-            2. Mirela Georgieva (mirela.georgieva@hackney.gov.uk)
-            3. Selwyn Preston (selwyn.preston@hackney.gov.uk)
-            4. Matthew Keyworth (matthew.keyworth@hackney.gov.uk) 
+ * This is done via Landesk (for UH)
+ * For CRM 365 credentials, please speak to:
+ 
+   1. Rashmi Shetty (rashmi.shetty@hackney.gov.uk)
+   2. Mirela Georgieva (mirela.georgieva@hackney.gov.uk)
+   3. Selwyn Preston (selwyn.preston@hackney.gov.uk)
+   4. Matthew Keyworth (matthew.keyworth@hackney.gov.uk) 
 
 Ensure that your API has the correct DB connection string in AWS parameter store
      * Open AWS management console and click on ‘Services’
