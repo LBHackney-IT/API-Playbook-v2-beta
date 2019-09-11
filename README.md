@@ -1,227 +1,387 @@
-# API Playbook
+# Welcome to the API-Playbook-v2 - [beta version]
 
-A guide on Hackney's development practices, and how to follow them.
+## API Implementation Guide - Playbook v2
 
-- [Application standards](#application-standards)
-  - [Open source on GitHub](#open-source-on-GitHub)
-  - [Follow the API Guidelines](#follow-the-api-guidelines)
-  - [Test-driven approach](#test-driven-approach)
-  - [12 Factor](#12-factor)
-- [Monitoring](#monitoring)
-  - [Centralised logging](#centralised-logging)
-  - [Centralised application performance monitoring](#centralised-application-performance-monitoring)
-  - [Centralised uptime monitoring](#centralised-uptime-monitoring)
-  - [Centralised exception logging](#centralised-exception-logging)
-  - [Health Checks](#health-checks)
-- [Containers](#containers)
+### Product Owner
+* Rashmi Shetty [rashmi.shetty@hackney.gov.uk]
+
+Contents
+
+- [Introduction](#introduction)
+  - [When to write an API](#when-to-write-an-api)
+  - [Establishing the user need](#establishing-the-user-need)
+- [Designing your API](#designing-your-api)
+- [Building your API](#building-your-api)
+     - [API Standards](#api-standards)
+- [Development approach](#development-approach)
+   - [Boilerplate Code](#boilerplate-code)
+   - [Containerisation](#containersation)
+   - [TDD - Test Driven Development](#test-driven-development)
+        - [How to write good TDDs](#how-to-write-good-TDDs)
+   - [Working with housing data - Universal housing simulator](#universal-housing-simulator)
+   - [Folder Structure](#folder-structure)
+   - [End-to-end testing](#end-to-end-testing)
 - [Hosting](#hosting)
-  - [ECS](#ecs)
-  - [API Gateway](#api-gateway)
-  - [Developing for ECS](#developing-for-ecs)
-  - [Future](#future)
-- [Deployment pipeline](#deployment-pipeline)
-- [Documentation standards](#documentation-standards)
-  - [Swagger](#swagger)
+   - [Current infrastructure architecture](#current-infrastructure-architecture)
+   - [Infrastructure as code](#infrastructure-as-code)
+   - [ECS](#ecs)
+   - [API Gateway](#api-gateway)
+   - [Monitoring tools](#monitoring-tools)
+       - [Centralised logging](#centralised-logging)
+       - [Centralised uptime monitoring](#centralised-uptime-monitoring)
+- [Deploying your API](#deploying-your-api)
+    - [CI/CD Pipeline](#ci-cd-pipeline)
+    - [Pre-deployment](#pre-deployment)
+    - [Our deployment pipeline](#our-deployment-pipeline)
+       - [Branching](#branching)
+       - [Automated deployment](#automated-deployment)
+    - [Our deployment pipeline](#our-deployment-pipeline)
+    - [End-to-end Testing (Post-deployment)](#end-to-end-testing)
+       - [Pre-requirements](#pre-requirements)
+- [CheckList)](#checklist)
+- [Making decisions about APIs)](#making-decisions-about-apis)
 
-## Application standards
 
-### Open source on GitHub
+## Introduction
 
-Our mission is to open source 100% of our code, and start in the open whenever starting new projects. All of our code repositories are on GitHub, over half are currently open source.
+We have two types of API in Hackney: a set of ‘platform APIs’ which present master data about our people and properties and ‘service APIs’ that provide the information required to enable the delivery of a digital service to our residents and businesses. 
 
-By employing a [12 Factor](#12-factor) methodology, we keep any secrets such as API tokens outside of our repositories, and instead injected as environment variables in trusted runtime environments. This allows us to write code which interacts with private systems without exposing information.
+In other words Platform APIs are data-driven, domain modelled which are built with reusability in mind where as Service APIs are specific to given service only which Platform APIs are unable to cater, These service APIs will directly extract data from specific datasource when required. We require Platform APIs to be as generic as possible in order to meet the needs for services and at the same time to be reusable and consistent. 
 
-### Follow the API Guidelines
+We’ve reached this position after exploring different levels of granularity for our APIs and determining that this is the optimum model for:
 
-We have documented our [guidelines][guidelines] for building ReSTful APIs for use in Hackney. These cover the specifics of how an API should be built, including how we implement ReST, HTTP standards, JSON data format, etc. This ensures that all Hackney APIs are built to the same standard and have consistency across all endpoints.
+1. Accelerating development
+2. Reducing duplication
+3. Providing a single version of the truth
 
-### 12 Factor
+APIs can be written by any person or agency working under contract to the London Borough of Hackney. Platform APIs are managed by the API Platform Product Owners whilst service APIs are the responsibility of the application manager or software vendor that is responsible for the service. 
 
-We follow 12 Factor principles when building new applications. You can find out more about why [in our Hackney Development Standards documentation][12-factor-documentation].
+The image below illustrates the target architecture: [Architecture](https://drive.google.com/file/d/1z_AhMogTYDW38i58TwMDHEA-3LASy1gC/edit)
 
-Following these principles allows our applications to be platform agnostic, meaning we're not tied down to running them on any specific vendor's platform, and don't have to make changes to application code in order to migrate them somewhere else.
+We’ve written about [what we’ve learnt about APIs](https://docs.google.com/document/d/10C2Ly0uhZ35g-p1215rJhKoRtWkKns5ax2gWOkGDglA/edit) and why we’ve adopted this approach. 
 
-### Test-driven approach
 
-We use Test Driven Development discipline when writing new code, as it makes it easier to build functionality progressively, helps reduce error rate in production, and helps prevent against feature regressions after changes. We sometimes employ [Clean Architecture][ca] which allows us to easily test each unit of our applications.
+### When to write an API
 
-There are some resources for [learning][learn-tech-learn-tdd] and [practicing][learn-tech-practice-tdd] TDD discipline on the [Learn Tech website][learn-tech].
+We want our data to be available via REST API wherever there is a user need. We are prioritising making data available via APIs where:
+1. Existing line of business applications enable us to develop APIs
+2. Data is required by two or more systems, so APIs enable more reliable, secure methods of data sharing
+3. APIs enable us to reduce dependence on one particular solution and develop new services better to meet user needs
 
-## Monitoring
+### Establishing the user need
 
-### Centralised logging
+Establishing the user need
 
-![Papertrail Example](images/papertrail.png)
+Before we write an API we need to establish the user need. Typically, we do this in a Discovery phase when we’re exploring the opportunity to use technology and data to better meet the needs of our residents. Our discovery phase should identify:
 
-We use [**Papertrail**][papertrail] as a centralised log platform, as it has a good interface, is easy to use, and is well priced. It allows us to see a stream of logs from a single application, a group of applications, or all applications at once. We can easily search by common references to trace requests across microservices.
+* What data we currently hold, where, who needs it and how it’s used
+* The lawful basis for processing this data and any consideration we need to give to privacy impact
+* Whether there are existing APIs that we can re-use
+* Any dependencies on data / reporting / MI with other teams
 
-If you are deployed to the [Hackney ECS environment](#hosting), your service will log to Papertrail automatically. You need to set the Hostname of your container to the name of your service in your task definition.
+We typically record the user need through user stories, but this can be decided by individual teams. A prototyping phase might experiment with a stub API so that we can validate the user need. 
 
-![Screenshot of setting container host name](images/task-definition-hostname.png)
+**_Example user story_**
+**_As an application developer, I need to be able to retrieve addresses added, deleted or modified in the property gazetteer between 2 dates so that I am assured the data we have is current_**
 
-### Centralised application performance monitoring
+On occasion, we will identify a user need for a platform API that hasn’t yet been fulfilled. This may mean we need to develop an API without a full understanding of the user need, meaning this will need to be iterated subsequently. The API Platform Product Owner makes these decisions on a case-by-case basis, in collaboration with the delivery managers and Data and Insight Manager. 
 
-![New Relic Screenshot](images/newrelic.png)
+## Designing your API
 
-We use [**New Relic**][newrelic] as a centralised application performance monitoring tool, as it is capable of instrumenting applications in many languages, including C# and Ruby. It allows us to see requests going through an application and where time is spent during those requests. For example, if a large SQL call is what is hurting performance.
+We have provided advice and guidance on how to design your API: 
+[Design your API](https://github.com/LBHackney-IT/API-Playbook/blob/master/api-guidelines/design-principles.md)
 
-In a .NET application, you install a New Relic Agent on the machine, which will automatically instrument any .NET apps running. You can find an example of setting this up in the [Tenancy API][dotnet-newrelic-example].
+## Building your API
 
-In a Ruby application, you install the New Relic gem and configure it with environment variables. You can find an example of setting this up in the [Income API][ruby-newrelic-example].
+### API Standards
 
-### Centralised uptime monitoring
+Your API will need to meet the following standards for it to be accepted into service:
+1. There is clear evidence of user need - the API provides the data needed to power one or more digital services.
+2. Publish your code in the open and use open source code to improve transparency, flexibility and accountability. When re-using code ensure that we benefit from the community that support it.
+3. The service meets security guidelines, minimises data collection and reuses existing data to avoid duplication of datasets. You have permission to use the data for this purpose and the approach to access management is consistent with that permission.
+4. You have identified the capacity, resources and technical flexibility to iterate and improve the service frequently.
+5. Work out what success looks like for your service and identify metrics which will tell you what’s working and what can be improved, combined with user research (uptake, calls per hour, availability).
+6. Optimise for performance, minimise service downtime and have a plan to deal with it when it does happen.
+7. Your API is clearly documented, meets our API design principles and naming conventions and has a named Product Owner.
+8. You have identical staging and production APIs 
+9. You have a clear and secure method of managing access, keys, authentication, users and versioning
+10. The API is developed to the principles in the Playbook and any exceptions have been agreed in advance
 
-![Pingdom](images/pingdom.png)
+## Development approach
 
-We use [**Pingdom**][pingdom] as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.
+###  Boilerplate Code
 
-We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services.
+**The principle: re-use our boilerplate code unless you can provide clear reasons it doesn’t meet your needs.**
 
-If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues.
+A template is provided on Github that forms the basis for all APIs. This base API contains all the tools to get you up and running quickly, so the first task in the development of any API is to fork the Base API Repo (https://github.com/LBHackney-IT/lbh-base-api) and update to your project name:
 
-### Centralised exception logging
+* Main project and test project folders
+* Namespaces in the .cs files (The Namespaces shouldn’t contain dash symbols as it prevents the project from compiling - replace them with underscores. Ex.: “property_api” rather than “property-api”.)
+* Project mentions in the dotnet csproj files for project and test solution
+* Project mentions in the docker-related files and CircleCI configuration
+* Create a public GitHub repo (ensure no secrets are submitted)
 
-![sentry](images/sentry.png)
+###  Containerisation
 
-We use [**Sentry**][sentry] as a centralised exception logging platform, as it's able to receive exceptions from many languages, including C# and Ruby, and has good tooling around releases. It logs every error which occurs in any of our systems, attaching metadata including which user experienced the error, what request they were trying to make, how many times that error has occurred, and which code release likely introduced the error.
+All APIs are run in a containerised environment, each solution (main and tests) do contain a The docker entry point is the docker-compose file and with its current setup it allows to build the project alongside an instance of the UH simulator. The Docker file contained in the base API should be updated to reflect the details of the project it is being used for. More information on how we use [Docker](https://docs.google.com/document/d/16HyKtQtUBjz-W9HwIPF4T-CnSe1m8poqCilRtRohZmQ/edit#heading=h.6jjvle8n1rck)
 
-It is very useful for developers/maintainers to investigate and fix application errors, including more information to aid diagnosis than stack traces in logging will.
+### TDD - Test Driven Development
+We use the Test Driven Development methodology when writing new code, as it makes it easier to build functionality progressively, helps reduce error rate in production, and helps prevent against feature regressions after changes. We use Clean Architecture principles which allows us to easily test each unit of our applications.
+ 
+* How to write good TDDs
 
-In a .NET application, you install a Sentry package using NuGet and use it to send messages to Sentry when handling uncaught exceptions. You can find an example of this in the [Tenancy API][dotnet-sentry-example].
+    * Always follow the triple ‘A’ structure - Arrange, Act, Assert [AAAs](https://drive.google.com/a/hackney.gov.uk/file/d/13g4UP5kxKziK-BhPxt_s8hIQUTT24hEJ/view?usp=sharing)
 
-In a Ruby application, you install the Sentry gem and configure it to add additional context. You can find an example of setting this up in the [Income API][ruby-sentry-example].
+The tests you write should drive the code produced, not the other way around - You should always first write the test, see it fail and then write the minimal necessary code to make it pass. Then you can work on refactoring it while making sure the test keeps passing. This ensures that all code written has test coverage. 
 
-### Health Checks
+   * We use currently nUnit and Moq frameworks for TDD however we welcome other frameworks as well such as xUnit,MSTest etc for .net core.
+       * Tests per class need to cover both ‘happy’ and ‘sad’ scenarios
+       * Tests that need to be included are (but not limited to):
+       * Test for a successful, populated response.
+       * Test for a successful, empty response.
+       * Test for a scenario when exception is thrown.
 
-As a developer I should make sure that I build 'Health Check API endpoints' to monitor is service up and report back if it goes down.
+### Working with housing data (Universal housing simulator)
 
-Also health checks can also be used by monitoring tools to track and alert on the availability and performance of the service, where they serve as early problem indicators. For eg Sentry for exception logging,New relic for application monitoring.
+A simulated testing version of UHT and UHW live databases - the integrated housing management application - is available for developers. The purpose of the simulator is to provide a mirror of the UH database structure and schema. It is used for testing purposes so we wouldn’t interact with the actual UHW and UHT database.
+ 
+[UH Stimulator](https://drive.google.com/a/hackney.gov.uk/file/d/13g4UP5kxKziK-BhPxt_s8hIQUTT24hEJ/view?usp=sharing)
 
-## Containers
 
-We use Docker containers when building new applications to allow them to be run anywhere without tedious environment set up. We run them both in development and in hosted environments, such as production environments.
+The project produces two versions:
+     * an empty one, used as part of TDD 
+     * a ‘loaded’ one containing real anonymised data
 
-We define `Dockerfile`s for each of our applications, generally building from a base language specific image, installing necessary system tools for our application to run, copying files onto the image and compiling the application. The built image can then be used in both development and production, as well as other hosted environments.
+Those versions are saved in images in an ECR repository.  The docker-compose.yml file specifies the image that the given API is pointing to. Example is provided below:
 
-In production any external systems we talk to will be managed and hosted separately, for example a database, or a webservice.
+[docker-compose yml](https://drive.google.com/a/hackney.gov.uk/file/d/1TEaUKmpYzXO1ngVemhhuyqmeBQObKpRB/view?usp=sharing)
 
-However, in development, we generally want to start up these development versions of these services at the same time as our application. We use `docker-compose` for this, to define dependencies when running locally and start them up as a cluster. This ensures all developers are running in reasonable parity with production when developing the application.
+**_We always specify the image tag after the name of the repository_**. Not doing so would make your API use the latest available image, which might have breaking changes. 
 
-We also use Docker when building tools, such as simulators, without a specific custom application. It makes it easy to build and distribute an image which applications can use as a dependency.
+When you run docker-compose up command locally, docker spins up both the API and the UH simulator database that is used throughout testing
 
-For an example of using Docker with .NET Core, see the [Tenancy API][tenancy-api].
+Once APIs are deployed to our development environment, we use an AWS RDS version of the UH simulator. 
+    * It's populated UH simulator with real anonymised data
+    * To use that version, the correct connection string needs to be provided in the ‘Parameter Store’.
 
-For an example of using Docker with Ruby, see the [Income API][income-api].
+The UH simulator DB was produced and maintained via a Ruby project. More on how it works can be found here.  
 
-For an example of using Docker with other tools, see the [Universal Housing Simulator][universal-housing-simulator] which creates and starts a SQL Server instance.
+### Folder structure
+
+Principle: Structure your APIs in this way so that Hackney can support them, unless there is good reason not to
+Based on this Clean Architecture methodology, our project folders are structured in the following way: 
+
+* **Boundary**
+     * Holds classes specifying the request and response objects of the API.
+
+* **Controllers** 
+     * Holds the controller classes
+          * By default, BaseController.cs and HealthCheckController.cs should be included in your project
+* **Domain**
+     * Holds the model class defining the domain object returned to the consumer of the API 
+
+* **Gateway**
+     * Holds the class responsible for establishing connection with the data source and retrieving/inserting/updating data queries to perform the given action against the data source 
+
+* **Infrastructure**
+     * Holds the model classes representing the domain object as it is in the data source
+
+* **Use Cases** 
+     * Holds the classes responsible for invoking the gateway logic and doing any data pre and post-processing before returning it to the controller
+
+All of the above classes are grouped per version. (e.g. all of the above folders are under a ‘V1’ parent folder)
+
+[Example of folder hierarchy](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
+
+* * Tests
+   The folder hierarchy of the test project should closely match that of the main project folder.  For each of the classes created for the project there should be a corresponding suite of tests.
+
+[Example test project folder hierarchy:](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
+
+### End-to-end testing (pre-deployment)
+
+_Principle: Tests are automated wherever possible including smoke testing, regression testing, lint testing, contract testing._
+
+All API solutions need to include end-to-end integration tests. The purpose of those is to test the functionality against real (anonymised) data, coming from a local or remote instance of UH simulatoral DB. 
+
+When testing against a local instance of the simulator, we are inserting fake data and testing against it. This means that we are testing against data that we had control over.
+
+Testing against real anonymised data will provide confidence in the sturdiness of the APIs built and will ensure that every scenario is covered.
+
+By default, building the project via docker-compose will create images of the project itself and the UH simulator loaded with anonymised data. We are also exploring with the idea of using a single instance of the UH Simulator hosted in RDS, though both methods of accessing the data source would be equivalent in terms of functionality.
+
 
 ## Hosting
 
-### ECS
+_Principle: The API is hosted by Hackney’s AWS account unless there is a good reason not to. _
 
-We use ECS on AWS to run Docker containers in the cloud. This allows us to use the same Docker containers we use in development, for actually serving in production. ECS orchestrates deployments of new images, running them on our own EC2 machines.
+Current infrastructure [Architecture](https://docs.google.com/document/d/1xmn82dGiubC9oX7AqSO6Ieo6OWJVphT_Qp55kdQBkuc/edit)
 
-ECS is a fairly simple and cost effective approach to running Docker in production, and allows us to run containers within our AWS VPC, which has a VPN connection to the Hackney network. It can also be securely connected to our AWS API Gateway without making the EC2 instances public, meaning they are more secure.
 
-Currently there is a bit of manual work to set up a new application on ECS, or to update configuration of an application hosted on ECS. This is because we were initially just trialling the service. We will be using Terraform and JSON configuration to provision our AWS environment soon, which will make it easier for developers to add new apps to the platform, and update their settings.
+1. Infrastructure as code
 
-Speak to one of the following for more information on getting set up with ECS:
+Our API infrastructure is deployed in AWS and we manage it using the Infrastructure as a code tool Terraform. We have a private Github repository with our Terraform project so new additions or modifications to our infrastructure should be worked out using it. More information on the Terraform project [Terraform](https://docs.google.com/document/d/1aUE7VnMvfvbDYVp5Kb8f6D0ALvXidkU4Gbbx4FEY2Cw/edit)
 
-- Richard Foster - Lead Engineer at [Made Tech][made-tech] (richard@madetech.com)
-- Rashmi Shetty - Development Manager at London Borough of Hackney (rashmi.shetty@hackney.gov.uk)
+2. ECS 
 
-### API Gateway
+We use ECS on AWS to run Docker containers in the cloud. This allows us to use the same Docker containers we use in development, for actually serving in production. ECS orchestrates deployments of new images, running them on our own EC2 machines. ECS is a fairly simple and cost effective approach to running Docker in production, and allows us to run containers within our AWS VPC, which has a VPN connection to the Hackney network. It can also be securely connected to our AWS API Gateway without making the EC2 instances public, meaning they are more secure.
+Currently we are using terraform to setup the new applications on ECS. For more details please read ‘Infrastructure as code’.
+ 
+3. API Gateway
 
-We use AWS API Gateway to handle requests coming into our platform, validate them, and direct them to the correct application.
-
-For example, a request to `/income/api/v1/my-cases` will be directed to the `/api/v1/my-cases` route of the Income API.
-
+We use AWS API Gateway to handle requests coming into our platform, validate them, and direct them to the correct application. For example, a request to /income/api/v1/my-cases will be directed to the /api/v1/my-cases route of the Income API.
 Authentication occurs inside the API Gateway too, validating that inbound requests have a valid API Token header, and forbidding them if not. Authenticated requests will be passed onto a load balancer via a VPC Link, which will then pass it onto the most appropriate application server.
 
-We do not currently have a domain for the platform, but are planning to soon.
+### Monitoring tools
 
-### Developing for ECS
+_Principle: If Hackney IT is responsible for the delivery or support of the application, Hackney’s monitoring tools need to be used._
 
-We use a VPN connection between our AWS VPC (Virtual Private Cloud) and the Hackney on-premises network. This permits ECS access to services, databases and webservices hosted on premises. We restrict IP ranges of available services, so you may need to adjust this if you require access to a service that hasn't been used from ECS before.
+1. Centralised logging
 
-Talk to the infrastructure team if you do.
+We use [Papertrial](https://papertrailapp.com/) as a centralised log platform, as it has a good interface, is easy to use, and is well priced. It allows us to see a stream of logs from a single application, a group of applications, or all applications at once. We can easily search by common references to trace requests across microservices. If you are deployed to the Hackney ECS environment, your service will log to Papertrail automatically. You need to set the Hostname of your container to the name of your service in your task definition.
+ 
+2. Centralised application performance monitoring
 
-### Future
+We use [New Relic](https://newrelic.com/) as a centralised application performance monitoring tool, as it is capable of instrumenting applications in many languages, including C# and Ruby. It allows us to see requests going through an application and where time is spent during those requests. For example, if a large SQL call is what is hurting performance. In a .NET application, you install a New Relic Agent on the machine, which will automatically instrument any .NET apps running.  [New Relic Setup Guide](https://docs.google.com/document/d/1Mew6ZDm-3PbbejiqV8E1qgEIrQmods3AT6-NQqX6yXo/edit).
+ 
+3. Centralised uptime monitoring
 
-Because all applications should be containerised, we can change the hosting provider with minimal to no interruption of service, and no application code change.
+We use [StatusCake](https://www.statuscake.com/) as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services. If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues. [StatusCake Setup Guide]https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
+This is directly integrated with Slack channel named as api-healthchecks.
 
-We are currently considering Kubernetes on AWS as an alternative to ECS. We also might replace AWS API Gateway with a more feature rich gateway.
 
-<!-- ### Past
 
-- trialled Heroku Enterprise -->
+## Deploying your API
 
-## Deployment pipeline
+### CI/CD Pipeline
 
-We use CircleCI workflows as deployment pipelines. This gives us a single standard method of deploying to production, with automated steps reducing room for human error.
+_**Principle: Use Circle CI/CD pipeline to run automated tests and integrate changes into the primary shared repository early and often unless there is good reasons not to.**_
 
-Using this workflow enforces automated checks run before releasing to staging or production. For example, tests must pass, linting must pass, and there must be no obvious vulnerabilities. Otherwise the developer will have to fix any issues before trying again.
+We use CircleCI for CI/CD pipeline. 
+More information on it [CircleCI](https://docs.google.com/document/d/1-wWbNTy60dzVv5w5Cx2s_WADCiRmW8jnTtUTkNaH2Jo/edit)
+### Pre-deployment
 
-This workflow means staging must be deployed before production, and a developer must approve a production release. This makes it more likely for developers to test in staging before promoting a change to production.
+Our base API repository already contains a CircleCI folder with a yml file. All api name references need to be changed to the name of the API you are working on.
+Ensure you have added all required CircleCI environment variables. The guide provided earlier in this document describes all required environment variables. 
 
-We typically configure four stages to a release:
 
-1. Build and check (**Automated**)
-  - Ensure the application compiles successfully (if necessary)
-  - Ensure automated tests pass
-  - Ensure linting passes (if available)
-  - Ensure vulnerability checker passes (if available)
-2. Staging Release (**Automated**)
-3. Hold for Production Release confirmation (**Manual**)
-4. Production Release (**Automated**)
+### Our deployment pipeline
 
-![Circle CI](images/circleci.png)
+[Deployment Pipeline](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
 
-## Documentation standards
+### Branching
 
-We document our applications to include certain key information. This ensures anybody interested in our project can be guaranteed certain information, and any developer can get set up in a consistent manner.
+**We use GitFlow branching strategy.**
 
-1. **Business context.** Who was this made for? Why was this made? Who was the product owner?
-2. **Stack.** What did we build this with? Why did we choose that?
-3. **Installation.** How do I get set up with the application as a new developer?
-4. **Development practices.** What practices should I adhere to when writing code?
-5. **Release process.** When do I release to production? What should I know beforehand? How to get code reviewed and approved?
-6. **Deployment pipeline.** What tools do I use to release to production?
-7. **Common problems.** Errors and issues developers experienced with the project will have all seen. Useful for new developers to have a reference.
-8. **Useful contacts**
-  - Active maintainers (developers, delivery managers, stakeholders)
-  - Other contacts (developers, delivery managers, stakeholders)
-  - Include name, title, company and email address for each.
+* ‘Master’ branch in the API’s GitHub repository represent what code is currently running in production
+       * Any hotfixes that need to be applied are branched from the ‘master’ branch and then merged into it.
 
-You can see the [Income API][income-api] or [Tenancy API][tenancy-api] for examples of this kind of documentation.
+* ‘Development’ branch represents what is currently deployed to our development environment.
+       * Any few features or bugs are worked on in branches that are branched from ‘development’. No new features/bugs are ever merged straight into ‘master’ branch.
 
-### Swagger
+### Automated deployment
 
-We use Swagger to get human readable and simple to use API documentation. The generated documentation can be viewed and understood by more than just developers, and is useful for understanding ways we could integrate different services.
+* After a successful merge of any feature or bug branch into ‘development’ triggers a CircleCI workflow that deploys to our development environment
+     * This does not require CircleCI authorization step
 
-The documentation shows a list of all endpoints available in the app, with detailed documentation of inputs and outputs. Other teams can use our swagger documentation to learn how to consume our APIs
+* Successful merge of ‘development’ or a hotfix branch into ‘master’, triggers a CircleCI workflow of deployment into staging and production.
+     * This involves an authorization step to deploy to staging.
+     * Upon successful staging deployment, the API needs to be tested by the developer.
+     * If changes are as expected, a second authorization needs to be provided to deploy to production.
+     * Following successful deployment to production, please follow the end-to-end testing guide described below.
 
-In a .NET application, you can use a NuGet package called Swashbuckle to generate Swagger documentation automatically from your typed code. You can find an example of this in the [Tenancy API][dotnet-swagger-example].
+**After code is merged into ‘master’ or ‘development’.**
 
-In a Ruby application you can use the `swagger-blocks` gem, which provides a DSL for defining Swagger documentation automatically. You can find an example of setting this up in the [Income API][ruby-swagger-example].
+* Monitor the workflows via the CircleCI interface to ensure deployment is successful 
 
-[sentry]: https://sentry.io/welcome/
-[papertrail]: http://papertrailapp.com
-[newrelic]: https://newrelic.com
-[tenancy-api]: https://github.com/LBHackney-IT/LBHTenancyAPI
-[income-api]: https://github.com/LBHackney-IT/lbh-income-api
-[dotnet-newrelic-example]: https://github.com/LBHackney-IT/LBHTenancyAPI/pull/82/files
-[ruby-newrelic-example]: https://github.com/LBHackney-IT/lbh-income-api/commit/98f7c574449c732962d73c4b907daaa1ed2e9b42
-[dotnet-sentry-example]: https://github.com/LBHackney-IT/LBHTenancyAPI/blob/bd56e77d10f61598be778e7b65630e7632c2afc7/LBHTenancyAPI/Infrastructure/V1/Logging/SentryLogger.cs
-[ruby-sentry-example]: https://github.com/LBHackney-IT/lbh-income-api/commit/058a87b7de1a71c922ac5d9eaac9117b10df88d2
-[12-factor-documentation]: ./12-factor.md
-[universal-housing-simulator]: http://example.com
-[made-tech]: https://www.madetech.com/
-[dotnet-swagger-example]: https://github.com/LBHackney-IT/LBHTenancyAPI/blob/master/LBHTenancyAPI/Startup.cs#L65-L112
-[ruby-swagger-example]: https://github.com/LBHackney-IT/lbh-income-api
-[learn-tech]: https://learn.madetech.com
-[learn-tech-learn-tdd]: https://learn.madetech.com/ideas/learn-to-tdd.html
-[learn-tech-practice-tdd]: https://learn.madetech.com/core-skills/tdd/
-[ca]: https://github.com/madetech/clean-architecture
-[pingdom]: https://www.pingdom.com
-[guidelines]: api-guidelines/README.md
+### End-to-end Testing (Post-deployment)
+
+Pre-requirements
+
+Production DB credentials need to be requested for the API you are working on
+     * This is done via Landesk (for UH)
+     * For CRM 365 credentials, please speak to:
+            1. Rashmi Shetty (rashmi.shetty@hackney.gov.uk)
+            2. Mirela Georgieva (mirela.georgieva@hackney.gov.uk)
+            3. Selwyn Preston (selwyn.preston@hackney.gov.uk)
+            4. Matthew Keyworth (matthew.keyworth@hackney.gov.uk) 
+
+Ensure that your API has the correct DB connection string in AWS parameter store
+     * Open AWS management console and click on ‘Services’
+     * Go to ‘Systems Manager’
+     * Click on ‘Parameter store’ (bottom left corner) 
+     * Locate the production DB connection string for the API you are working on
+     * Update the connection string to be pointing to a production DB and to include the correct credentials. If unsure of DB server, please consult the production connection strings of any of the other APIs using the same DB as data source
+
+**Ensure that the CircleCI deployment workflow authorization step has been completed**. Deployment to production will NOT occur until a manual authorization has been provided in the CircleCI console. Please see below:
+
+[Circle CI](https://drive.google.com/a/hackney.gov.uk/file/d/1dSGhsTZQHLWy8aTJ3gNpeg2tSSfOMClV/view?usp=sharing)
+
+To authorize, click on the underlined step above and authorize the deployment.
+
+Once deployment has been successful, use Postman or any similar tool to invoke the endpoint.
+ * Where to find endpoint URL
+   1. Log in to AWS management console
+   2. Go to Services -> API Gateway
+   3. On the left side, choose ‘Stages’
+   4. Choose the stage, which you want and navigate to your API resource
+   5. Copy the invoke URL and replace the ‘{proxy}’ part with the path of the endpoint you wish to invoke’.
+
+[AWS Stage](https://drive.google.com/a/hackney.gov.uk/file/d/16wnJkiQjxwPqNR1Wc0szuEodrr3MFS7X/view?usp=sharing)
+
+* In order to test an API via Postman (or similar), you will require an API key. This guide outlines the steps in order to obtain an API key.
+
+### Checklist
+
+* Ensure that your API has been deployed to production.
+   - This requires a manual authorization step in CircleCI to allow deployment to production.
+
+* Ensure that your API resource in AWS gateway has custom authorizer set up (required for custom API keys that we use). Guide of how to add the authorizer to the API resource can be found here.
+
+* Ensure that you have deployed your AWS gateway to production as changes to the API Gateway are not applied until the gateway it is deployed. If unsure of how to do this or whether it is safe to deploy, please speak to:
+Technical Team:
+  * Rashmi Shetty [rashmi.shetty@hackney.gov.uk]
+  * Mirela Georgieva [mirela.georgieva@hackney.gov.uk] 
+  * Selwyn Preston [selwyn.preston@hackney.gov.uk]
+  * Matthew Keyworth [matthew.keyworth@hackney.gov.uk]
+
+* Ensure that you have an API key as described above. 
+* Test for a main endpoint (one that retrieves data) and the health check endpoint - both of them should be successfully invoked for testing to pass. 
+
+## Making decisions about APIs
+
+ICT DMT agreed the API standards in autumn 2019 in line with commonly used approaches, particularly:
+  * 12 factor development principles
+  * GDS API standards
+
+Any revisions to the API standard or the principles within the Playbook only take effect when they are agreed by ICT DMT. 
+
+The design of a Platform API needs to be agreed with:
+  * API Platform Product Owner.
+  * The Data and Insight team manager
+  * The Product Owner for the service
+  * Applications Management (where it connects to a live business system)
+  * ICT technical architecture and security
+  * Information governance
+
+
+The design of a Service API needs to be agreed with:
+  * API Platform Product Owner
+  * The Product Owner for the service
+  * Applications Management (where it connects to a live business system)
+  * ICT technical architecture and security
+  * Information governance (where it deals with personally-identifiable information)
+
+Before the first deployment, you need a change management request (CMR) agreed by the relevant teams. This is likely to require a conversation, including:
+ * API Platform Product Owner
+ * The Product Owner for the service
+ * Applications Management
+ * ICT technical architecture and security
+ * Information governance
+
+Subsequent deployments can be made without further change control except where they may have an additional impact on the live environment or architecture of the API or the service. 
+
+An API will be assessed against the standard:
+ * When a developer review individual pull requests
+ * As part of the Service Standard assessment, and then published on the API portal 
+
