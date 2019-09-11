@@ -46,7 +46,7 @@ Contents
 
 We have two types of API in Hackney: a set of ‘platform APIs’ which present master data about our people and properties and ‘service APIs’ that provide the information required to enable the delivery of a digital service to our residents and businesses. 
 
-In other words Platform APIs are data-driven, domain modelled which are built with reusability in mind where as Service APIs are specific to given service only which Platform APIs are unable to cater, These service APIs will directly extract data from specific datasource when required. We require Platform APIs to be as generic as possible in order to meet the needs for services and at the same time to be reusable and consistent. 
+In other words Platform APIs are data-driven, domain modelled which are built with reusability in mind where as Service APIs are specific to given service which Platform APIs are unable to cater. These service APIs will directly extract data from specific datasource when required. We require Platform APIs to be as generic as possible in order to meet the needs for services and at the same time to be reusable and consistent. 
 
 We’ve reached this position after exploring different levels of granularity for our APIs and determining that this is the optimum model for:
 
@@ -56,7 +56,9 @@ We’ve reached this position after exploring different levels of granularity fo
 
 APIs can be written by any person or agency working under contract to the London Borough of Hackney. Platform APIs are managed by the API Platform Product Owners whilst service APIs are the responsibility of the application manager or software vendor that is responsible for the service. 
 
-The image below illustrates the target architecture: [Architecture](https://drive.google.com/file/d/1z_AhMogTYDW38i58TwMDHEA-3LASy1gC/edit)
+The image below illustrates the target architecture: 
+
+![PlatformAPI](images/PlatformAPI.png)
 
 We’ve written about [what we’ve learnt about APIs](https://docs.google.com/document/d/10C2Ly0uhZ35g-p1215rJhKoRtWkKns5ax2gWOkGDglA/edit) and why we’ve adopted this approach. 
 
@@ -137,7 +139,9 @@ We use the Test Driven Development methodology when writing new code, as it make
  
 * How to write good TDDs
 
-    * Always follow the triple ‘A’ structure - Arrange, Act, Assert [AAAs](https://drive.google.com/a/hackney.gov.uk/file/d/13g4UP5kxKziK-BhPxt_s8hIQUTT24hEJ/view?usp=sharing)
+    * Always follow the triple ‘A’ structure - Arrange, Act, Assert [AAAs]
+
+![TDD](images/TDD.png)
 
 The tests you write should drive the code produced, not the other way around - You should always first write the test, see it fail and then write the minimal necessary code to make it pass. Then you can work on refactoring it while making sure the test keeps passing. This ensures that all code written has test coverage. 
 
@@ -152,8 +156,7 @@ The tests you write should drive the code produced, not the other way around - Y
 
 A simulated testing version of UHT and UHW live databases - the integrated housing management application - is available for developers. The purpose of the simulator is to provide a mirror of the UH database structure and schema. It is used for testing purposes so we wouldn’t interact with the actual UHW and UHT database.
  
-[UH Stimulator](https://drive.google.com/a/hackney.gov.uk/file/d/13g4UP5kxKziK-BhPxt_s8hIQUTT24hEJ/view?usp=sharing)
-
+![UHStimulator](images/UHStimulator.png))
 
 The project produces two versions:
      * an empty one, used as part of TDD 
@@ -161,7 +164,7 @@ The project produces two versions:
 
 Those versions are saved in images in an ECR repository.  The docker-compose.yml file specifies the image that the given API is pointing to. Example is provided below:
 
-[docker-compose yml](https://drive.google.com/a/hackney.gov.uk/file/d/1TEaUKmpYzXO1ngVemhhuyqmeBQObKpRB/view?usp=sharing)
+![dockercomposeyaml](images/docker-compose-yaml.png))
 
 **_We always specify the image tag after the name of the repository_**. Not doing so would make your API use the latest available image, which might have breaking changes. 
 
@@ -199,12 +202,12 @@ Based on this Clean Architecture methodology, our project folders are structured
 
 All of the above classes are grouped per version. (e.g. all of the above folders are under a ‘V1’ parent folder)
 
-[Example of folder hierarchy](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
+![folderstructure](images/folderstructure.png))
 
 * * Tests
    The folder hierarchy of the test project should closely match that of the main project folder.  For each of the classes created for the project there should be a corresponding suite of tests.
 
-[Example test project folder hierarchy:](https://drive.google.com/a/hackney.gov.uk/file/d/1arYqOD_A4CcYLkpLgUkoVBFreEPn7TBq/view?usp=sharing)
+![folderstructure](images/folderstructure.png))
 
 ### End-to-end testing (pre-deployment)
 
@@ -233,6 +236,7 @@ Our API infrastructure is deployed in AWS and we manage it using the Infrastruct
 **2. ECS**
 
 We use ECS on AWS to run Docker containers in the cloud. This allows us to use the same Docker containers we use in development, for actually serving in production. ECS orchestrates deployments of new images, running them on our own EC2 machines. ECS is a fairly simple and cost effective approach to running Docker in production, and allows us to run containers within our AWS VPC, which has a VPN connection to the Hackney network. It can also be securely connected to our AWS API Gateway without making the EC2 instances public, meaning they are more secure.
+
 Currently we are using terraform to setup the new applications on ECS. For more details please read ‘Infrastructure as code’.
  
 **3. API Gateway**
@@ -254,10 +258,11 @@ We use [New Relic](https://newrelic.com/) as a centralised application performan
  
 **3. Centralised uptime monitoring**
 
-We use [StatusCake](https://www.statuscake.com/) as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services. If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues. [StatusCake Setup Guide]https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
+We use [StatusCake](https://www.statuscake.com/) as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services. If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues. 
+
+[StatusCake Setup Guide] https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
+
 This is directly integrated with Slack channel named as api-healthchecks.
-
-
 
 ## Deploying your API
 
@@ -267,11 +272,11 @@ _**Principle: Use Circle CI/CD pipeline to run automated tests and integrate cha
 
 We use CircleCI for CI/CD pipeline. 
 More information on it [CircleCI](https://docs.google.com/document/d/1-wWbNTy60dzVv5w5Cx2s_WADCiRmW8jnTtUTkNaH2Jo/edit)
+
 ### Pre-deployment
 
 Our base API repository already contains a CircleCI folder with a yml file. All api name references need to be changed to the name of the API you are working on.
 Ensure you have added all required CircleCI environment variables. The guide provided earlier in this document describes all required environment variables. 
-
 
 ### Our deployment pipeline
 
@@ -326,7 +331,7 @@ Ensure that your API has the correct DB connection string in AWS parameter store
 
 **Ensure that the CircleCI deployment workflow authorization step has been completed**. Deployment to production will NOT occur until a manual authorization has been provided in the CircleCI console. Please see below:
 
-[Circle CI](https://drive.google.com/a/hackney.gov.uk/file/d/1dSGhsTZQHLWy8aTJ3gNpeg2tSSfOMClV/view?usp=sharing)
+![CircleCI](images/CircleCI.png))
 
 To authorize, click on the underlined step above and authorize the deployment.
 
@@ -338,7 +343,7 @@ Once deployment has been successful, use Postman or any similar tool to invoke t
    4. Choose the stage, which you want and navigate to your API resource
    5. Copy the invoke URL and replace the ‘{proxy}’ part with the path of the endpoint you wish to invoke’.
 
-[AWS Stage](https://drive.google.com/a/hackney.gov.uk/file/d/16wnJkiQjxwPqNR1Wc0szuEodrr3MFS7X/view?usp=sharing)
+![AWSStage](images/AWSStage.png))
 
 * In order to test an API via Postman (or similar), you will require an API key. This guide outlines the steps in order to obtain an API key.
 
@@ -356,8 +361,12 @@ Technical Team:
   * Selwyn Preston [selwyn.preston@hackney.gov.uk]
   * Matthew Keyworth [matthew.keyworth@hackney.gov.uk]
 
-* Ensure that you have an API key as described above. 
-* Test for a main endpoint (one that retrieves data) and the health check endpoint - both of them should be successfully invoked for testing to pass. 
+* Ensure that you have an API key as described above.
+
+* Test for a main endpoint (one that retrieves data) and the health check endpoint - both of them should be successfully invoked for testing to pass.
+
+* Other complaince checklists are
+![hackneystandardscompliance](images/hackneystandardscompliance.png.png))
 
 ## Making decisions about APIs
 
