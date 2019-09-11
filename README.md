@@ -266,7 +266,7 @@ We use [New Relic](https://newrelic.com/) as a centralised application performan
 
 We use [StatusCake](https://www.statuscake.com/) as a centralised uptime monitoring service, as it's a more cost effective solution than competitors for basic service.We configure it to make a simple HTTPS request to an endpoint in each application in each environment, every minute, to track uptime of our services. If the applications go down, automated alerts are sent to responsible team members. This lets them know when they need to take action, and informs them of potential problems in their production environments before users have to raise issues. 
 
-[StatusCake Setup Guide] https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
+**StatusCake Setup Guide** https://docs.google.com/document/d/1I-8YXnXSDyOol85KlL5ALdxRm92gi2hWzXRIj3tyq2M/edit
 
 This is directly integrated with Slack channel named as api-healthchecks.
 
