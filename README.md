@@ -132,9 +132,9 @@ Currently the above boilerplate is created .net core however going forward we wi
 
 All APIs are run in a containerised environment, each solution (main and tests) do contain a The docker entry point is the docker-compose file and with its current setup it allows to build the project alongside an instance of the UH simulator. The Docker file contained in the base API should be updated to reflect the details of the project it is being used for. More information on how we use [Docker](https://docs.google.com/document/d/16HyKtQtUBjz-W9HwIPF4T-CnSe1m8poqCilRtRohZmQ/edit#heading=h.6jjvle8n1rck)
 
-For an example of using Docker with .NET Core, see the [Tenancy API] https://github.com/LBHackney-IT/LBHTenancyAPI.
+For an example of using Docker with .NET Core, see the [Tenancy API](https://github.com/LBHackney-IT/LBHTenancyAPI).
 
-For an example of using Docker with Ruby, see the [Income API] https://github.com/LBHackney-IT/lbh-income-api.
+For an example of using Docker with Ruby, see the [Income API](https://github.com/LBHackney-IT/lbh-income-api).
 
 ### TDD - Test Driven Development
 
