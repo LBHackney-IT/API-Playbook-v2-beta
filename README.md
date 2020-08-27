@@ -40,6 +40,7 @@ Contents
     - [End-to-end Testing (Post-deployment)](#end-to-end-testing)
        - [Pre-requirements](#pre-requirements)
 - [CheckList](#checklist)
+  - [Production Testing criteria](#production-testing-criteria)
 - [Making decisions about APIs](#making-decisions)
 
 
@@ -374,6 +375,11 @@ Technical Team:
 * Other complaince checklists are
 
 ![hackneystandardscompliance](images/hackneystandardscompliance.png)
+
+# Production Testing Criteria
+For production API testing we have defined a set of criterias as mentioned in below document link.The tasks should be completed before every API deployment into production, unless there is a valid reason to not complete a given task. This reason should be documented.
+
+https://docs.google.com/document/d/1SSB2dEwd1-ni2NmXn4MgU0bIJdXJAyc5aza0R4zDaA0/edit
 
 ## Making decisions about APIs
 
